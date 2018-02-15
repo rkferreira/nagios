@@ -10,6 +10,7 @@
 *
 * VERSION	DATE		WHO						DETAIL
 * 0.1		07Feb18		Rodrigo Ferreira <rkferreira@gmail.com>		Initial version
+* 0.2		15Feb18		Rodrigo Ferreira <rkferreira@gmail.com>		Minor fixes
 *
 '''
 
@@ -66,6 +67,9 @@ def NagiosStatus(value, descid, desc):
 def EmptyOK():
 	return (5, 'GOT_EMPTY_FROM_UNITY', 'I got no entries in the entries list of HEALTH.')
 
+def EmptyCouldNotGet():
+	return (0, 'COULD_NOT_REQUEST_URL', 'I could not request the API url')
+
 
 ## Information about general settings for the storage system. 
 #
@@ -75,12 +79,20 @@ def getSystem(hostaddress, token, cookie):
 	requrl  = 'https://'+hostaddress+baseurl+options
 	
 	headers = {'Accept': 'application/json', 'Content-type': 'application/json', 'X-EMC-REST-CLIENT': 'true', 'Cache-Control': 'no-cache', 'Pragma': 'no-cache', 'EMC-CSRF-TOKEN': token}
-	r = requests.get(requrl, headers=headers, verify=False, cookies=cookie)
-	j = json.loads(r.text)
-
-	descid = str(j['entries'][0]['content']['health']['descriptionIds'][0])
-	desc   = str(j['entries'][0]['content']['health']['descriptions'][0])
-	value  = j['entries'][0]['content']['health']['value']
+	
+	ret = 0
+	sta = 0
+	while ((sta != 200) or (ret < 4)):
+		r = requests.get(requrl, headers=headers, verify=False, cookies=cookie)
+		sta = r.status_code
+		ret += 1
+	try:
+		j = json.loads(r.text)
+		descid = str(j['entries'][0]['content']['health']['descriptionIds'][0])
+		desc   = str(j['entries'][0]['content']['health']['descriptions'][0])
+		value  = j['entries'][0]['content']['health']['value']
+	except ValueError:
+		value, descid, desc = EmptyCouldNotGet()
 
 	return (value, descid, desc)
 
@@ -454,6 +466,17 @@ def getUncommittedport(hostaddress, token, cookie):
 	return (value, descid, desc)
 
 
+def logout(hostaddress, token, cookie):
+        baseurl = '/api/types/loginSessionInfo/action/logout'
+        requrl  = 'https://'+hostaddress+baseurl
+
+        payload = {'localCleanupOnly': 'true'}
+        headers = {'Accept': 'application/json', 'Content-type': 'application/json', 'X-EMC-REST-CLIENT': 'true', 'Cache-Control': 'no-cache', 'Pragma': 'no-cache', 'EMC-CSRF-TOKEN': token}
+        r = requests.post(requrl, headers=headers, verify=False, cookies=cookie, data=json.dumps(payload))
+        j = json.loads(r.text)
+        return j['logout']
+
+
 def login(hostaddress, user, password):
 	baseurl = '/api/types/loginSessionInfo'
 	requrl  = 'https://'+hostaddress+baseurl
@@ -494,42 +517,51 @@ def main():
 	descid = None
 	desc   = None
 
-	if (module.lower() == 'system'):
-		value, descid, desc = getSystem(hostaddress, token, cookie)
-	if (module.lower() == 'battery'):
-		value, descid, desc = getBattery(hostaddress, token, cookie)
-	if (module.lower() == 'dae'):
-		value, descid, desc = getDae(hostaddress, token, cookie)
-	if (module.lower() == 'disk'):
-		value, descid, desc = getDisk(hostaddress, token, cookie)
-	if (module.lower() == 'dpe'):
-		value, descid, desc = getDpe(hostaddress, token, cookie)
-	if (module.lower() == 'ethernetport'):
-		value, descid, desc = getEthernetport(hostaddress, token, cookie)
-	if (module.lower() == 'fan'):
-		value, descid, desc = getFan(hostaddress, token, cookie)
-	if (module.lower() == 'fcport'):
-		value, descid, desc = getFcport(hostaddress, token, cookie)
-	if (module.lower() == 'iomodule'):
-		value, descid, desc = getIomodule(hostaddress, token, cookie)
-	if (module.lower() == 'lcc'):
-		value, descid, desc = getLcc(hostaddress, token, cookie)
-	if (module.lower() == 'memorymodule'):
-		value, descid, desc = getMemorymodule(hostaddress, token, cookie)
-	if (module.lower() == 'powersupply'):
-		value, descid, desc = getPowersupply(hostaddress, token, cookie)
-	if (module.lower() == 'sasport'):
-		value, descid, desc = getSasport(hostaddress, token, cookie)
-	if (module.lower() == 'ssc'):
-		value, descid, desc = getSsc(hostaddress, token, cookie)
-	if (module.lower() == 'ssd'):
-		value, descid, desc = getSsd(hostaddress, token, cookie)
-	if (module.lower() == 'storageprocessor'):
-		value, descid, desc = getStorageprocessor(hostaddress, token, cookie)
-	if (module.lower() == 'uncommittedport'):
-		value, descid, desc = getUncommittedport(hostaddress, token, cookie)
+	if token and cookie:
+
+		if (module.lower() == 'system'):
+			value, descid, desc = getSystem(hostaddress, token, cookie)
+		if (module.lower() == 'battery'):
+			value, descid, desc = getBattery(hostaddress, token, cookie)
+		if (module.lower() == 'dae'):
+			value, descid, desc = getDae(hostaddress, token, cookie)
+		if (module.lower() == 'disk'):
+			value, descid, desc = getDisk(hostaddress, token, cookie)
+		if (module.lower() == 'dpe'):
+			value, descid, desc = getDpe(hostaddress, token, cookie)
+		if (module.lower() == 'ethernetport'):
+			value, descid, desc = getEthernetport(hostaddress, token, cookie)
+		if (module.lower() == 'fan'):
+			value, descid, desc = getFan(hostaddress, token, cookie)
+		if (module.lower() == 'fcport'):
+			value, descid, desc = getFcport(hostaddress, token, cookie)
+		if (module.lower() == 'iomodule'):
+			value, descid, desc = getIomodule(hostaddress, token, cookie)
+		if (module.lower() == 'lcc'):
+			value, descid, desc = getLcc(hostaddress, token, cookie)
+		if (module.lower() == 'memorymodule'):
+			value, descid, desc = getMemorymodule(hostaddress, token, cookie)
+		if (module.lower() == 'powersupply'):
+			value, descid, desc = getPowersupply(hostaddress, token, cookie)
+		if (module.lower() == 'sasport'):
+			value, descid, desc = getSasport(hostaddress, token, cookie)
+		if (module.lower() == 'ssc'):
+			value, descid, desc = getSsc(hostaddress, token, cookie)
+		if (module.lower() == 'ssd'):
+			value, descid, desc = getSsd(hostaddress, token, cookie)
+		if (module.lower() == 'storageprocessor'):
+			value, descid, desc = getStorageprocessor(hostaddress, token, cookie)
+		if (module.lower() == 'uncommittedport'):
+			value, descid, desc = getUncommittedport(hostaddress, token, cookie)
+
+                s = logout(hostaddress, token, cookie)
+	else:
+		value  = 0
+		descid = 'COULD_NOT_LOGIN'
+		desc   = 'Could not login on REST url'
+		
 	
-	if value and descid and desc:
+	if (value or value == 0) and descid and desc:
 		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
 		print ('%s: %s,%s,%s' % (s_nagios,s_msg1,s_msg2,s_val))
 	sys.exit(0)
