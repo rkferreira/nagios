@@ -11,6 +11,7 @@
 * VERSION	DATE		WHO						DETAIL
 * 0.1		07Feb18		Rodrigo Ferreira <rkferreira@gmail.com>		Initial version
 * 0.2		15Feb18		Rodrigo Ferreira <rkferreira@gmail.com>		Minor fixes
+* 0.3		22Feb18		Rodrigo Ferreira <rkferreira@gmail.com>		Fixed exit values
 *
 '''
 
@@ -51,16 +52,16 @@ resolutions	List<String>	Resolutions are URLs to get more information about this
 '''
 def NagiosStatus(value, descid, desc):
 	if value == 0:
-		return ('UNKNOWN', descid, desc, value)
+		return ('UNKNOWN', descid, desc, value, 3)
 	else:
 		if value == 5:
-			return ('OK', descid, desc, value)
+			return ('OK', descid, desc, value, 0)
 		else:
 			if (value > 5 and value < 20):
-				return ('WARNING', descid, desc, value)
+				return ('WARNING', descid, desc, value, 1)
 			else:
 				if value >= 20:
-					return ('CRITICAL', descid, desc, value)
+					return ('CRITICAL', descid, desc, value, 2)
 	return False
 
 
@@ -113,7 +114,7 @@ def getBattery(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -136,7 +137,7 @@ def getDae(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -159,7 +160,7 @@ def getDisk(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -200,7 +201,7 @@ def getEthernetport(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -223,7 +224,7 @@ def getFan(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -246,7 +247,7 @@ def getFcport(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -269,7 +270,7 @@ def getIomodule(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -292,7 +293,7 @@ def getLcc(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -315,7 +316,7 @@ def getMemorymodule(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -338,7 +339,7 @@ def getPowersupply(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -361,7 +362,7 @@ def getSasport(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -387,7 +388,7 @@ def getSsc(hostaddress, token, cookie):
 			descid = str(x['content']['health']['descriptionIds'][0])
 			desc   = str(x['content']['health']['descriptions'][0])
 			value  = x['content']['health']['value']
-			s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+			s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 			if (s_nagios != "OK"):
 				return (value, descid, desc)
 
@@ -410,7 +411,7 @@ def getSsd(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -433,7 +434,7 @@ def getStorageprocessor(hostaddress, token, cookie):
 		descid = str(x['content']['health']['descriptionIds'][0])
 		desc   = str(x['content']['health']['descriptions'][0])
 		value  = x['content']['health']['value']
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		if (s_nagios != "OK"):
 			return (value, descid, desc)
 
@@ -459,7 +460,7 @@ def getUncommittedport(hostaddress, token, cookie):
 			descid = str(x['content']['health']['descriptionIds'][0])
 			desc   = str(x['content']['health']['descriptions'][0])
 			value  = x['content']['health']['value']
-			s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+			s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 			if (s_nagios != "OK"):
 				return (value, descid, desc)
 
@@ -562,8 +563,9 @@ def main():
 		
 	
 	if (value or value == 0) and descid and desc:
-		s_nagios, s_msg1, s_msg2, s_val = NagiosStatus(value, descid, desc)
+		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		print ('%s: %s,%s,%s' % (s_nagios,s_msg1,s_msg2,s_val))
+                sys.exit(s_exit)
 	sys.exit(0)
 
 
