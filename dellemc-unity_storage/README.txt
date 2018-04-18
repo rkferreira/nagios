@@ -11,3 +11,8 @@ check_unity2.py: error: argument -m/--module is required
 
 [root@]# ./check_unity2.py -H myunitybox.foo.com -u monituser -p monitpass -m system
 OK: ALRT_SYSTEM_OK,The system is operating normally.,5
+
+
+** Currently running and tested on RHEL5/Centos5:
+    python26-requests-0.13.1-1.el5
+    python26-argparse-1.2.1-3.el5
