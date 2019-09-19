@@ -18,7 +18,8 @@
 import json, requests
 import argparse
 import sys
-
+import urllib3
+urllib3.disable_warnings()
 
 '''
 ## Nagios
@@ -488,6 +489,8 @@ def login(hostaddress, user, password):
 	if r.status_code == 200:
 		token  = r.headers['emc-csrf-token']
 		cookie = r.cookies
+		for history in r.history:
+			requests.cookies.merge_cookies(cookie,history.cookies)
 	else:
 		token  = 0
 		cookie = 0
@@ -555,7 +558,7 @@ def main():
 		if (module.lower() == 'uncommittedport'):
 			value, descid, desc = getUncommittedport(hostaddress, token, cookie)
 
-                s = logout(hostaddress, token, cookie)
+		s = logout(hostaddress, token, cookie)
 	else:
 		value  = 0
 		descid = 'COULD_NOT_LOGIN'
@@ -565,7 +568,7 @@ def main():
 	if (value or value == 0) and descid and desc:
 		s_nagios, s_msg1, s_msg2, s_val, s_exit = NagiosStatus(value, descid, desc)
 		print ('%s: %s,%s,%s' % (s_nagios,s_msg1,s_msg2,s_val))
-                sys.exit(s_exit)
+		sys.exit(s_exit)
 	sys.exit(0)
 
 
